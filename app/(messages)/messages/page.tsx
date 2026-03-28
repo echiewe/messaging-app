@@ -5,11 +5,8 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Conversation } from "@/lib/types";
 
-import { PixelBorder } from "../../components/PixelBorder";
 import LoadingPage from "../../components/Loading";
 import ErrorPage from "../../components/Error";
-import Header from "../components/Header";
-import NavBar from "../components/NavBar";
 import ConversationPreview from "./components/ConversationPreview";
 import AddChatButton from "../components/AddChatButton";
 import Background from "../components/Background";
