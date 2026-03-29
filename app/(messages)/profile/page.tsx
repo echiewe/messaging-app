@@ -7,6 +7,8 @@ import Background from "../components/Background";
 import SignOutButton from "../components/SignOutButton";
 import LoadingPage from "@/app/components/Loading";
 
+export const dynamic = 'force-dynamic';
+
 export default function Profile() {
     const [isEditing, setIsEditing] = useState(false)
     const [draftDisplayName, setDraftDisplayName] = useState('')

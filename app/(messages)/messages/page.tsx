@@ -11,6 +11,7 @@ import ConversationPreview from "./components/ConversationPreview";
 import AddChatButton from "../components/AddChatButton";
 import Background from "../components/Background";
 
+export const dynamic = 'force-dynamic';
 
 export default function Messages() {
     const supabase = createClient();

@@ -7,6 +7,8 @@ import { createConversation } from '@/app/services/createConversation';
 import Background from "../../components/Background";
 import { User } from '@/lib/types';
 
+export const dynamic = 'force-dynamic';
+
 export default function NewConversation() {
     const supabase = createClient();
     const router = useRouter();
