@@ -56,14 +56,14 @@ export default function NewConversation() {
             setLoading(true);
             const users = await fetchUsers(prefix);
             const filtered = (users ?? []).filter(
-                (u) => !selectedUsers.some((s) => s.id === u.id)    // THIS LINE 
+                (u) => !selectedUsers.some((s) => s.id === u.id)
             );
             setResults(filtered);
             setIsOpen(filtered.length > 0);
             setLoading(false);
         }, 300);
 
-        return () => clearTimeout(timeout);             // THIS LINE
+        return () => clearTimeout(timeout);
     }, [prefix, selectedUsers]);
 
     useEffect(() => {
@@ -96,26 +96,29 @@ export default function NewConversation() {
                 ? selectedUsers.map(user => user.username).join(", ")
                 : chatName;
        
-        const { error, conversationId } = await createConversation(
+        const { error } = await createConversation(
             selectedUsers.map((u) => u.id), // only pass IDs, not full user objects
             convName
         )
 
         if (error) {
-            console.log(error)
-            setError(error)
-            return
+            console.log(error);
+            setError(error);
+            return;
         }
 
         router.push('/messages');
     }
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return <Background headerTitle='New Chat' className='flex flex-col justify-center items-center'>
+            <p className='text-red-500'>{error}</p>
+            <p className='text-red-500'>Please try again later.</p>
+        </Background>;
     }
-    
-    return(
-        <Background headerTitle='New Chat'>
+
+    return (
+        <Background headerTitle='New Chat' className='px-3 py-4'>
             <form onSubmit={(e) => {e.preventDefault(); handleSubmit()}} className="flex flex-col h-full justify-between py-5">
                 <div className="">
                     <div className="flex flex-col gap-3">

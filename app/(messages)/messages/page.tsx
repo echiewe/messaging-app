@@ -78,7 +78,7 @@ export default function Messages() {
     };   
     
     return (
-        <Background headerTitle="Messages" >
+        <Background headerTitle="Messages" className="relative">
             { renderConversations() }
             <AddChatButton />
         </Background>

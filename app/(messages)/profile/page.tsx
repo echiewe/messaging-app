@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 
 import Background from "../components/Background";
 import SignOutButton from "../components/SignOutButton";
+import LoadingPage from "@/app/components/Loading";
 
 export default function Profile() {
     const [isEditing, setIsEditing] = useState(false)
@@ -95,39 +96,40 @@ export default function Profile() {
         setLoading(false)
     }
 
+    if (loading) {
+        return <Background headerTitle="Profile">
+            <LoadingPage/>
+        </Background>
+    }
+
     return(
-        <Background headerTitle='Profile' className="px-3 py-4 flex flex-col gap-4">
-            {/* <div className="flex justify-start gap-5">
-                <img src='/icons/jas.png' alt="profile image" width={60} className="border border-dark-green p-2" />
-                <p className="text-xl">{displayName}</p>
-                <SignOutButton />
-            </div>
-            <div>Username: {username}</div>
-            <div>Email: {email}</div>
-            <button className="button">Update profile</button> */}
-            <div className="flex justify-start gap-5 items-center">
+        <Background headerTitle='Profile' className="px-3 py-4 flex flex-col gap-4 items-center">
+            <div className="flex flex-col justify-start gap-5 items-center">
                 <img
                 src='/icons/jas.png'
                 alt="profile image"
-                width={60}
+                width={100}
                 className="border border-dark-green p-2"
                 />
-                {isEditing ? (
-                <input
-                    className="input"
-                    value={draftDisplayName}
-                    onChange={(e) => setDraftDisplayName(e.target.value)}
-                    placeholder="Display name"
-                />
-                ) : (
-                <p className="text-xl">{displayName}</p>
-                )}
-                <SignOutButton />
+                <div className="flex gap-3">
+                    {isEditing ? (
+                    <input
+                        className="input"
+                        value={draftDisplayName}
+                        onChange={(e) => setDraftDisplayName(e.target.value)}
+                        placeholder="Display name"
+                    />
+                    ) : (
+                    <p className="text-2xl">{displayName}</p>
+                    )}
+                    <SignOutButton />
+                </div>
+                
             </div>
 
             {/* Username */}
             <div className="flex items-center gap-2">
-                <span>Username:</span>
+                <p className="text-xl">Username:</p>
                 {isEditing ? (
                 <input
                     className="input"
@@ -136,28 +138,27 @@ export default function Profile() {
                     placeholder="Username"
                 />
                 ) : (
-                <span>{username}</span>
+                <p className="text-xl">{username}</p>
                 )}
             </div>
 
-            {/* Email — never editable, just displayed */}
-            <div>Email: {email}</div>
+            <p className="text-xl">Email: {email}</p>
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
             {/* Action buttons */}
             {isEditing ? (
                 <div className="flex gap-2">
-                <button className="button" onClick={handleSave} disabled={loading}>
-                    {loading ? "Saving..." : "Save"}
-                </button>
-                <button className="button" onClick={handleCancel} disabled={loading}>
-                    Cancel
-                </button>
+                    <button className="button" onClick={handleSave} disabled={loading}>
+                        {loading ? "Saving..." : "Save"}
+                    </button>
+                    <button className="button" onClick={handleCancel} disabled={loading}>
+                        Cancel
+                    </button>
                 </div>
             ) : (
                 <button className="button" onClick={handleEdit}>
-                Update profile
+                Edit profile
                 </button>
             )}
             

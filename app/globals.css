@@ -67,5 +67,5 @@ input, textarea, p, span {
 }
 
 .button {
-    @apply px-3 py-2 border-dark-green bg-dark-green hover:bg-dark-green/60 text-white;
+    @apply px-3 py-2 border-dark-green bg-dark-green hover:bg-dark-green/60 text-white disabled:opacity-60 disabled:cursor-not-allowed;
 }
