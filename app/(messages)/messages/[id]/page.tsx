@@ -6,6 +6,8 @@ import Header from '../../components/Header';
 import { useRouter } from 'next/navigation';
 import Background from '../../components/Background';
 
+export const dynamic = 'force-dynamic';
+
 type Props = {
   params: Promise<{ id: string }>
 }

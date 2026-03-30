@@ -9,31 +9,20 @@ export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [username, setUsername] = useState<string>('');
     const [isSignUp, setIsSignUp] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState<String | null>(null);
+    const [loading, setLoading] = useState<string | null>(null);
 
     async function handleEmailAuth() {
         setError(null);
-        setLoading('loading');
         if (isSignUp) {
-            // check username availability first
-            const { data: existing } = await supabase
-                .from('profiles')
-                .select('id')
-                .eq('username', username)
-                .single()
-
-            if (existing) {
-                setLoading(null)
-                return setError("Username is already taken.")
-            }
-
+            setLoading("Signing up...")
             const { data, error: signUpError } = await supabase.auth.signUp({
                 email,
                 password,
-                options: { data: { username } }
+                options: {
+                    emailRedirectTo: `${window.location.origin}/auth/callback`
+                }
             });
 
             if (signUpError) return setError(signUpError.message);
@@ -43,17 +32,26 @@ export default function LoginPage() {
                 setLoading(null);
                 return setError("An account with this email already exists. Please sign in instead.");
             }
-
+            setEmail('');
+            setPassword('');
+            window.alert('Check your email to verify your account.');
         } else {
+            setLoading('Signing in...');
             const { error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) return setError(error.message);
+            router.push('/messages');
         }
 
-        router.push('/messages');
         router.refresh();
         setLoading(null);
     };
 
+    async function handleGoogleLogin() {
+        await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: `${location.origin}/auth/callback` }
+        });
+    };
 
     const resetPassword = async () => {
         if (!email.trim()) {
@@ -85,15 +83,6 @@ export default function LoginPage() {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                     className='login-input'
                 />
-                {isSignUp && 
-                <input
-                    type="text"
-                    placeholder='Username'
-                    value={username}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
-                    className='login-input'
-                />
-                }
                 <input
                     type="password"
                     placeholder="Password"
@@ -105,10 +94,13 @@ export default function LoginPage() {
 
             {error && <p className='text-red-500'>{error}</p>}
 
-            <button onClick={handleEmailAuth} className='block w-[150px] button'>
-                {isSignUp ? 'Sign Up' : 'Sign In'}
+            <button onClick={handleEmailAuth} disabled={loading != null} className='block w-[150px] button'>
+                {loading ? loading : (isSignUp ? 'Sign Up' : 'Sign In')}
             </button>
 
+            <button onClick={handleGoogleLogin} className='block w-[200px] button'>
+                Continue with Google
+            </button>
 
             <p>
                 {isSignUp ? 'Already have an account? ': "Don't have an account? "} 
