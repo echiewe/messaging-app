@@ -117,7 +117,12 @@ export default function ConversationPage({ params }: Props) {
                     <div className='flex flex-col flex-1 w-full overflow-auto py-2'>
                         {messages.map((m) => (
                             <div className={`w-full flex ${m.sender_id == user ? 'justify-end': 'justify-start'}`} key={m.id}>
-                                <p className={`w-max p-2 m-2 ${m.sender_id == user ? 'bg-light-green': 'bg-gray-200'}`}>{m.content}</p>
+                                <div className={`flex flex-col ${m.sender_id == user ? 'items-end' : 'items-start'}`}>
+                                    <p className={`max-w-xs p-2 m-2 ${m.sender_id == user ? 'bg-light-green' : 'bg-gray-200'}`}>
+                                        {m.content}
+                                    </p>
+                                    <p className='text-gray-300 text-xs mx-2'>{new Date(m.created_at).toLocaleTimeString()}</p>
+                                </div>
                             </div>
                         ))}
                         <div ref={bottomRef} />

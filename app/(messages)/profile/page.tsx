@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import Background from "../components/Background";
 import SignOutButton from "../components/SignOutButton";
 import LoadingPage from "@/app/components/Loading";
+import Alert from "@/app/components/Alert";
 
 export const dynamic = 'force-dynamic';
 
@@ -17,13 +18,19 @@ export default function Profile() {
     const [displayName, setDisplayName] = useState<string | null>(null);
     const [email, setEmail] = useState<string | null>(null);
 
+    const [isAlert, setIsAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertStatus, setAlertStatus] = useState('');
+
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [fetching, setFetching] = useState<boolean>(false);
 
     const supabase = createClient();
 
     useEffect(() => {
         async function fetchProfile() {
+            setFetching(true);
             const { data: { user } } = await supabase.auth.getUser();
 
             const { data: profile, error } = await supabase
@@ -40,12 +47,22 @@ export default function Profile() {
             setUsername(profile!.username);
             setDisplayName(profile!.display_name)
             setEmail(user!.email as string);
+            setFetching(false);
         }
         fetchProfile();
-    })
+    }, [])
+
+    useEffect(() => {
+        if (!isAlert) return;
+
+        const timer = setTimeout(() => {
+            setIsAlert(false);
+        }, 3000); 
+
+        return () => clearTimeout(timer);
+    }, [isAlert]);
 
     function handleEdit() {
-        // sync drafts to current saved values before opening edit mode
         setDraftDisplayName(displayName!);
         setDraftUsername(username!);
         setIsEditing(true);
@@ -92,78 +109,90 @@ export default function Profile() {
         }
 
         // commit drafts to display values only on success
-        setDisplayName(draftDisplayName)
-        setUsername(draftUsername)
-        setIsEditing(false)
-        setLoading(false)
+        setDisplayName(draftDisplayName);
+        setUsername(draftUsername);
+        setIsEditing(false);
+        setLoading(false);
+
+        setIsAlert(true);
+        setAlertMessage('Profile successfully updated.')
+        setAlertStatus('success');
     }
 
-    if (loading) {
+    if (fetching) {
         return <Background headerTitle="Profile">
             <LoadingPage/>
         </Background>
     }
 
+
     return(
         <Background headerTitle='Profile' className="px-3 py-4 flex flex-col gap-4 items-center">
+            {isAlert && <Alert message={alertMessage} status={alertStatus}/>}
+
             <div className="flex flex-col justify-start gap-5 items-center">
                 <img
                 src='/icons/jas.png'
                 alt="profile image"
-                width={100}
+                width={180}
                 className="border border-dark-green p-2"
                 />
-                <div className="flex gap-3">
-                    {isEditing ? (
+            </div>
+
+            {/* Display Name */}
+            <div className="flex flex-col gap-3 w-full">
+                <p className="text-lg">Display Name: </p>
+                {isEditing ? (
                     <input
                         className="input"
                         value={draftDisplayName}
                         onChange={(e) => setDraftDisplayName(e.target.value)}
                         placeholder="Display name"
-                    />
-                    ) : (
-                    <p className="text-2xl">{displayName}</p>
-                    )}
-                    <SignOutButton />
-                </div>
-                
+                    />    
+                ) : (
+                    <p className="inactive-input">{displayName}</p>
+                )}
+                         
             </div>
 
             {/* Username */}
-            <div className="flex items-center gap-2">
-                <p className="text-xl">Username:</p>
+            <div className="flex flex-col gap-3 w-full">
+                <p className="text-lg">Username:</p>
                 {isEditing ? (
-                <input
-                    className="input"
-                    value={draftUsername}
-                    onChange={(e) => setDraftUsername(e.target.value)}
-                    placeholder="Username"
-                />
+                    <input
+                        className="input"
+                        value={draftUsername}
+                        onChange={(e) => setDraftUsername(e.target.value)}
+                        placeholder="Username"
+                    />
                 ) : (
-                <p className="text-xl">{username}</p>
+                    <p className="inactive-input">{username}</p>
                 )}
             </div>
 
-            <p className="text-xl">Email: {email}</p>
+            <div className="flex flex-col gap-3 w-full">
+                <p className="text-lg">Email:</p>
+                <p className="inactive-input">{email}</p>
+            </div>
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
             {/* Action buttons */}
             {isEditing ? (
-                <div className="flex gap-2">
-                    <button className="button" onClick={handleSave} disabled={loading}>
+                <div className="flex flex-col gap-2 w-full">
+                    <button className="button w-full" onClick={handleSave} disabled={loading}>
                         {loading ? "Saving..." : "Save"}
                     </button>
-                    <button className="button" onClick={handleCancel} disabled={loading}>
+                    <button className="button w-full" onClick={handleCancel} disabled={loading}>
                         Cancel
                     </button>
                 </div>
             ) : (
-                <button className="button" onClick={handleEdit}>
+                <button className="button w-full" onClick={handleEdit}>
                 Edit profile
                 </button>
             )}
-            
+            {!isEditing && <SignOutButton />}
         </Background>
     );
 }

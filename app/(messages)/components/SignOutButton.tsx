@@ -12,6 +12,6 @@ export default function SignOutButton() {
         router.refresh()
     }
 
-    return <button className='h-max w-max' 
-    onClick={handleSignOut}><img src='/icons/logout.png' width={35}/></button>
+    return <button className='h-max w-full scary-button' 
+    onClick={handleSignOut}>Logout</button>
 }

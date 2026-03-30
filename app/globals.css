@@ -62,10 +62,18 @@ input, textarea, p, span {
     @apply w-full p-3 bg-light-green border-b border-dark-green;
 }
 
+.inactive-input {
+    @apply w-full p-3 bg-gray-200 border-b border-gray-500;
+}
+
 .login-input {
     @apply block w-full px-3 py-2 border-dark-green border-2;
 }
 
 .button {
     @apply px-3 py-2 border-dark-green bg-dark-green hover:bg-dark-green/60 text-white disabled:opacity-60 disabled:cursor-not-allowed;
+}
+
+.scary-button {
+    @apply px-3 py-2 border-red-600 border bg-gray-100 hover:bg-gray-200 text-red-600 disabled:opacity-60 disabled:cursor-not-allowed;
 }
