@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 
 const tabs = [
     { label: 'Chats', href: '/messages', border: 'border-r border-dark-green' },
+    { label: 'Pics', href: '/image-creation', border: '' },
     { label: 'Profile', href: '/profile', border: 'border-l border-dark-green' },
 ];
 

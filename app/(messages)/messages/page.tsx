@@ -70,7 +70,7 @@ export default function Messages() {
                     <Link key={c.id} href={`/messages/${c.id}`}>
                         <ConversationPreview 
                         conversationTitle={c.name} 
-                        lastMessage={c.lastMessage} 
+                        lastMessage={c.lastMessage.length > 45 ? c.lastMessage.slice(0,45) + '...' : c.lastMessage} 
                         status="unread"/>
                     </Link>
                 ))}

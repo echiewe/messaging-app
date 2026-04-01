@@ -1,7 +1,7 @@
 # Messaging App!
 
 ## Deployed through Vercel
-See the app [here](link).
+See the app [here](https://jaschat.vercel.app).
 
 ## Code Documentation
 
@@ -26,18 +26,18 @@ See the app [here](link).
 ### User Stories
 
 #### Must
-- users should be able to log in with an email and password 
-- users should be able to log out 
-- users should be able to send and receive messages
-- users should be able to set usernames (unique) and display names (doesn't need to be unique)
-- users should be able to search for users based on username or display name and start a conversation with them 
+- ~~users should be able to log in with an email and password~~
+- ~~users should be able to log out~~
+- ~~users should be able to send and receive messages~~
+- ~~users should be able to set usernames (unique) and display names (doesn't need to be unique)~~
+- ~~users should be able to search for users based on username or display name and start a conversation with them~~
 
 #### Should 
 - users should be able to reply to messages 
-- users should be able to add profile images
-- users should be able to update profile images
+- ~~users should be able to add profile images~~
+- ~~users should be able to update profile images~~
 - users should be able to see when others in the chat are typing 
-- users should be able to recover their account if they forget their password 
+- ~~users should be able to recover their account if they forget their password~~
 
 #### Could 
 - users should be able to react to messages with emojis

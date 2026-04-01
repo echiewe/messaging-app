@@ -3,6 +3,7 @@ export type Message = {
     content: string
     created_at: string
     sender_id: string
+    type: 'text' | 'image'
 }
 
 export type Conversation = {
@@ -22,5 +23,5 @@ export type User = {
     id: string
     username: string
     display_name: string
-    avatar: string
+    avatar_url: string
 }
