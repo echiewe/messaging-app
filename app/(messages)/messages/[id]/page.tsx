@@ -100,7 +100,7 @@ export default function ConversationPage({ params }: Props) {
     async function insertIntoDB() {
         const { error } = await supabase
             .from('messages')
-            .insert({conversation_id: id, sender_id: user, content: message});
+            .insert({conversation_id: id, sender_id: user, content: message, type: 'text'});
         if (error) {
             console.error("Error sending message:", error);
             setError("Error sending message. Please try again later.");
@@ -118,15 +118,28 @@ export default function ConversationPage({ params }: Props) {
                         {messages.map((m) => (
                             <div className={`w-full flex ${m.sender_id == user ? 'justify-end': 'justify-start'}`} key={m.id}>
                                 <div className={`flex flex-col ${m.sender_id == user ? 'items-end' : 'items-start'}`}>
-                                    <p className={`max-w-xs p-2 m-2 ${m.sender_id == user ? 'bg-light-green' : 'bg-gray-200'}`}>
-                                        {m.content}
-                                    </p>
+                                    {m.type === 'image' ? (
+                                        <img
+                                        src={m.content} 
+                                        alt="sent image"
+                                        className={`max-w-xs m-2 rounded cursor-pointer`}
+                                        onClick={() => window.open(m.content, '_blank')} // open full size on click
+                                        onError={(e) => {
+                                            e.currentTarget.src = '/icons/broken-image.png'
+                                        }}
+                                        />
+                                    ) : (
+                                        <p className={`max-w-xs p-2 m-2 ${m.sender_id == user ? 'bg-light-green' : 'bg-gray-200'}`}>
+                                            {m.content}
+                                        </p>
+                                    )}
                                     <p className='text-gray-300 text-xs mx-2'>{new Date(m.created_at).toLocaleTimeString()}</p>
                                 </div>
                             </div>
                         ))}
                         <div ref={bottomRef} />
                     </div>
+
                     <div className='flex w-full'>
                         <input 
                         className='flex-1 border border-dark-green focus:outline-none focus:ring-1 focus:ring-blue p-2' 
@@ -136,8 +149,8 @@ export default function ConversationPage({ params }: Props) {
                         placeholder='Message...'/>
                         <button className='bg-dark-green text-white p-2' onClick={handleSend}>Send</button>
                     </div>
+
                 </div>
-                {/* <PixelBorder children={<p className="text-xl">MESSAGE</p>}/> */}
             </div>
         </div>
     );
