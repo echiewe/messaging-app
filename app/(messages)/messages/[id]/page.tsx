@@ -155,7 +155,24 @@ export default function ConversationPage({ params }: Props) {
                     <div className='flex flex-col flex-1 w-full overflow-auto py-2'>
                         {messages.map((m) => (
                             <div className={`w-full flex ${m.sender_id == user ? 'justify-end': 'justify-start'}`} key={m.id}>
-                                <p className={`w-max p-2 m-2 ${m.sender_id == user ? 'bg-light-green': 'bg-gray-200'}`}>{m.content}</p>
+                                <div className={`flex flex-col ${m.sender_id == user ? 'items-end' : 'items-start'}`}>
+                                    {m.type === 'image' ? (
+                                        <img
+                                        src={m.content} 
+                                        alt="sent image"
+                                        className={`max-w-xs m-2 rounded cursor-pointer`}
+                                        onClick={() => window.open(m.content, '_blank')} // open full size on click
+                                        onError={(e) => {
+                                            e.currentTarget.src = '/icons/broken-image.png'
+                                        }}
+                                        />
+                                    ) : (
+                                        <p className={`max-w-xs p-2 m-2 ${m.sender_id == user ? 'bg-light-green' : 'bg-gray-200'}`}>
+                                            {m.content}
+                                        </p>
+                                    )}
+                                    <p className='text-gray-300 text-xs mx-2'>{new Date(m.created_at).toLocaleTimeString()}</p>
+                                </div>
                             </div>
                         ))}
                         <div ref={bottomRef} />
@@ -198,8 +215,8 @@ export default function ConversationPage({ params }: Props) {
                             <button className='bg-dark-green text-white p-2' onClick={handleSend}>Send</button>
                         </div>
                     </div>
+
                 </div>
-                {/* <PixelBorder children={<p className="text-xl">MESSAGE</p>}/> */}
             </div>
         </div>
     );

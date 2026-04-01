@@ -59,13 +59,21 @@ input, textarea, p, span {
 }
 
 .input {
-    @apply w-full p-3 bg-light-green border-b border-dark-green;
+    @apply w-full p-3 bg-light-green border-b border-dark-green focus:outline-none focus:ring-1 focus:ring-blue;
+}
+
+.inactive-input {
+    @apply w-full p-3 bg-gray-200 border-b border-gray-500;
 }
 
 .login-input {
-    @apply block w-full px-3 py-2 border-dark-green border-2;
+    @apply block w-full px-3 py-2 border-dark-green border-2 focus:outline-none focus:ring-1 focus:ring-blue;
 }
 
 .button {
-    @apply px-3 py-2 border-dark-green bg-dark-green hover:bg-dark-green/60 text-white disabled:opacity-60 disabled:cursor-not-allowed;
+    @apply px-3 py-2 border-dark-green bg-dark-green text-white disabled:opacity-60 disabled:cursor-not-allowed hover:shadow-xl transition-all duration-150;
+}
+
+.scary-button {
+    @apply px-3 py-2 border-orange border-2 hover:bg-gray-100 text-orange disabled:opacity-60 disabled:cursor-not-allowed;
 }

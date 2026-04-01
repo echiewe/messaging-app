@@ -15,7 +15,7 @@ export default function Background({ children, className, headerTitle, headerIco
                 <div className="w-full flex justify-center">
                     <Header iconUrl='/icons/icon.png' title={headerTitle} onIconClick={headerIconFunc} width={40} />
                 </div>
-                <div className={`flex-1 w-full ${className}`}>{children}</div>
+                <div className={`flex-1 w-full overflow-auto ${className}`}>{children}</div>
                 <div className="w-full">
                     <NavBar />
                 </div>
