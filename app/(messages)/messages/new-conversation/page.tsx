@@ -35,7 +35,7 @@ export default function NewConversation() {
         async function fetchUsers(prefix: string) {
             const { data: profiles, error } = await supabase
                 .from('profiles')
-                .select('id, username, display_name')
+                .select('id, username, display_name, avatar_url')
                 .or(`username.ilike.${prefix}%, display_name.ilike.${prefix}%`)
                 .neq('id', currUserId);
             
@@ -149,12 +149,15 @@ export default function NewConversation() {
                                     results.map((user) => (
                                         <button
                                         key={user.id}
-                                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex flex-col"
+                                        className="w-full h-10 text-left px-3 py-2 text-sm hover:bg-gray-100 flex gap-2 items-center"
                                         onMouseDown={(e) => e.preventDefault()} // prevent input blur before click fires
                                         onClick={() => handleSelect(user)}
                                         >
-                                        <span className="font-medium">{user.display_name}</span>
-                                        <span className="text-gray-400 text-xs">@{user.username}</span>
+                                            <img src={user.avatar_url ?? '/icons/default-avatar.jpg'} alt='profile image' className='h-full w-auto'/>
+                                            <div>
+                                                <p className="font-medium">{user.display_name}</p>
+                                                <p className="text-gray-400 text-xs">@{user.username}</p>
+                                            </div>
                                         </button>
                                     ))
                                 )}

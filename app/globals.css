@@ -59,7 +59,7 @@ input, textarea, p, span {
 }
 
 .input {
-    @apply w-full p-3 bg-light-green border-b border-dark-green;
+    @apply w-full p-3 bg-light-green border-b border-dark-green focus:outline-none focus:ring-1 focus:ring-blue;
 }
 
 .inactive-input {
@@ -67,7 +67,7 @@ input, textarea, p, span {
 }
 
 .login-input {
-    @apply block w-full px-3 py-2 border-dark-green border-2;
+    @apply block w-full px-3 py-2 border-dark-green border-2 focus:outline-none focus:ring-1 focus:ring-blue;
 }
 
 .button {
@@ -75,5 +75,5 @@ input, textarea, p, span {
 }
 
 .scary-button {
-    @apply px-3 py-2 border-red-600 border bg-gray-100 hover:bg-gray-200 text-red-600 disabled:opacity-60 disabled:cursor-not-allowed;
+    @apply px-3 py-2 border-orange border-2 hover:bg-gray-100 text-orange disabled:opacity-60 disabled:cursor-not-allowed;
 }

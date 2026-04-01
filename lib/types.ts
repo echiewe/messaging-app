@@ -23,5 +23,5 @@ export type User = {
     id: string
     username: string
     display_name: string
-    avatar: string
+    avatar_url: string
 }
