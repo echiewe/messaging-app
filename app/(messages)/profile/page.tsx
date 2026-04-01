@@ -15,6 +15,7 @@ export default function Profile() {
     const [draftUsername, setDraftUsername] = useState('')
     const [username, setUsername] = useState<string | null>(null);
     const [displayName, setDisplayName] = useState<string | null>(null);
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [email, setEmail] = useState<string | null>(null);
 
     const [error, setError] = useState<string | null>(null);

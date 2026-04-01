@@ -35,7 +35,8 @@ export default function Messages() {
                 messages (
                     conversation_id,
                     content,
-                    created_at
+                    created_at,
+                    type
                 )
             `)
             .eq('conversation_members.user_id', user!.id)
@@ -51,7 +52,7 @@ export default function Messages() {
                 id: row.id,
                 created_at: row.created_at,
                 name: row.name,
-                lastMessage: row.messages[0]?.content ?? "Start chatting!"
+                lastMessage: row.messages[0]?.content ? (row.messages[0].type === 'image' ? '[Image]' : row.messages[0].content) : "Start chatting!"
             }));
 
             if (!error) setConversations(conversations as Conversation[]);
