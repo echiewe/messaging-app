@@ -122,7 +122,6 @@ export default function ConversationPage({ params }: Props) {
                 setError("Error sending message. Please try again later.");
             }
         }
-        
     }
 
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,7 +148,13 @@ export default function ConversationPage({ params }: Props) {
         <div className="h-screen w-screen bg-white md:bg-[#ecf0e9] flex justify-center items-center">
             <div className='h-full w-full md:h-4/5 md:w-1/4  md:bg-white border-dark-green border-4 flex flex-col justify-end items-center'>
                 <div className="w-full flex justify-center">
-                    <Header iconUrl='/icons/back.png' title={chatName} onIconClick={() => router.push('/messages')} width={20} />
+                    <Header 
+                    iconUrl='/icons/back.png' 
+                    title={chatName} 
+                    onIconClick={() => router.push('/messages')} 
+                    width={20} 
+                    aboutIcon={true} 
+                    aboutPage={() => router.push(`/messages/${id}/chat-info`)}/>
                 </div>
                 <div className="flex-1 min-h-0 w-full p-3 flex flex-col">
                     <div className='flex flex-col flex-1 w-full overflow-auto py-2'>

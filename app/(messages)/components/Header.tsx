@@ -4,24 +4,31 @@ type Props = {
     iconUrl: string
     title?: string
     onIconClick?: () => void
+    aboutIcon?: boolean
+    aboutPage?: () => void
     width: number
 }
 
-export default function Header({ iconUrl, title, onIconClick, width }: Props) {
+export default function Header({ iconUrl, title, onIconClick, aboutIcon, aboutPage, width }: Props) {
     return(
         <div className="w-full relative h-20 flex items-center justify-between px-3 bg-light-green border-b border-dark-green">
             
 
-            <div className="absolute inset-0 flex px-3 mx-3 justify-start items-center gap-6">
+            <div className="absolute inset-0 flex px-3 mx-3 justify-between items-center">
+                <div className="flex justify-start items-center gap-6">
+                    <button
+                    onClick={onIconClick ?? undefined}
+                    disabled={!onIconClick}
+                    >
+                    <img src={iconUrl} alt='header icon' width={width}/>
+                    </button>
+                    {title && <h1 className="text-xl">{title}</h1>}
+                </div>
+                {aboutIcon && 
                 <button
-                onClick={onIconClick ?? undefined}
-                disabled={!onIconClick}
-                >
-                <img src={iconUrl} alt='header icon' width={width}/>
-                </button>
-                {title && <h1 className="text-xl">{title}</h1>}
-                {/* <img src='/icons/icon.png' width={45} className="pixelated"/>
-                <SignOutButton /> */}
+                onClick={aboutPage}>
+                    <img src='/icons/info.png' width={20}/>
+                </button>}
             </div>
             
         </div>

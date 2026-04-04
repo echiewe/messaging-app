@@ -120,7 +120,7 @@ export default function NewConversation() {
     }
 
     return (
-        <Background headerTitle='New Chat' className='px-3 py-4'>
+        <Background headerTitle='New Chat' headerIconUrl='/icons/back.png' headerIconWidth={20} headerIconFunc={() => router.push('/messages')} className='px-3 py-4'>
             <form onSubmit={(e) => {e.preventDefault(); handleSubmit()}} className="flex flex-col h-full justify-between py-5">
                 <div className="">
                     <div className="flex flex-col gap-3">

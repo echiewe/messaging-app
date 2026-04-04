@@ -75,5 +75,5 @@ input, textarea, p, span {
 }
 
 .scary-button {
-    @apply px-3 py-2 border-orange border-2 hover:bg-gray-100 text-orange disabled:opacity-60 disabled:cursor-not-allowed;
+    @apply px-3 py-2 border-orange border-2 bg-white hover:bg-gray-100 text-orange disabled:opacity-60 disabled:cursor-not-allowed;
 }

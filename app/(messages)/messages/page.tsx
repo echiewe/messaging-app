@@ -62,26 +62,30 @@ export default function Messages() {
         fetchConversations();
     }, []);
 
-    const renderConversations = () => {
-        if (loading) return <LoadingPage />;
-        if (error) return <ErrorPage message={error}/>;
-        return (
+    if (loading) {
+        return <Background headerTitle="Messages">
+            <LoadingPage/>
+        </Background>
+    }
+
+    if (error) {
+        return <Background headerTitle="Messages">
+            <ErrorPage message={error}/>
+        </Background>
+    }
+    
+    return (
+        <Background headerTitle="Messages" className="relative">
             <div className="flex flex-col w-full overflow-auto">
                 {conversations?.map((c) => (
                     <Link key={c.id} href={`/messages/${c.id}`}>
                         <ConversationPreview 
                         conversationTitle={c.name} 
-                        lastMessage={c.lastMessage.length > 45 ? c.lastMessage.slice(0,45) + '...' : c.lastMessage} 
+                        lastMessage={c.lastMessage.length > 30 ? c.lastMessage.slice(0,30) + '...' : c.lastMessage} 
                         status="unread"/>
                     </Link>
                 ))}
             </div>
-        );
-    };   
-    
-    return (
-        <Background headerTitle="Messages" className="relative">
-            { renderConversations() }
             <AddChatButton />
         </Background>
     );
