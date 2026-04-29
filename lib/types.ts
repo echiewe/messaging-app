@@ -12,6 +12,8 @@ export type Conversation = {
     name: string
     lastMessage: string
     messages: Message[]
+    lastSent: string
+    isUnread: boolean
 }
 
 export type ConversationMember = {

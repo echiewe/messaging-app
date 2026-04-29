@@ -24,13 +24,15 @@ export default function Messages() {
             const { data: { user } } = await supabase.auth.getUser();
 
             const { data, error } = await supabase
-            .from('conversations')
+            .from('conversations_with_last_message')
             .select(`
                 id,
                 created_at,
                 name,
+                last_message_at,
                 conversation_members!inner (
-                    user_id
+                    user_id,
+                    last_read_at
                 ),
                 messages (
                     conversation_id,
@@ -41,6 +43,7 @@ export default function Messages() {
             `)
             .eq('conversation_members.user_id', user!.id)
             .order('created_at', { referencedTable: 'messages', ascending: false })
+            .order('last_message_at', { ascending: false })
             .limit(1, { referencedTable: 'messages' })
 
             if (error) {
@@ -48,12 +51,24 @@ export default function Messages() {
                 setError("Error loading data. Please try again.");
             }
 
-            const conversations = data?.map((row) => ({
-                id: row.id,
-                created_at: row.created_at,
-                name: row.name,
-                lastMessage: row.messages[0]?.content ? (row.messages[0].type === 'image' ? '[Image]' : row.messages[0].content) : "Start chatting!"
-            }));
+            const conversations = data?.map((row) => {
+                const lastMessage = row.messages[0]?.content ? (row.messages[0].type === 'image' ? '[Image]' : row.messages[0].content) : "Start chatting!"
+                const lastReadAt = row.conversation_members?.[0]?.last_read_at
+                const lastSent = row.messages[0]?.created_at || row.created_at
+                const isUnread = lastMessage && lastReadAt
+                    ? new Date(lastSent) > new Date(lastReadAt) 
+                    && lastMessage.sender_id !== user 
+                    : false
+
+                return {
+                    id: row.id,
+                    created_at: row.created_at,
+                    name: row.name,
+                    lastMessage: lastMessage,
+                    lastSent: lastSent,
+                    isUnread: isUnread
+                }
+            });
 
             if (!error) setConversations(conversations as Conversation[]);
             setLoading(false);
@@ -61,6 +76,17 @@ export default function Messages() {
 
         fetchConversations();
     }, []);
+
+    const parseDate = (date: Date) => {
+        const now = new Date();
+        const isToday = date.toDateString() === now.toDateString();
+
+        if (isToday) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } else {
+            return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        }
+    }
 
     if (loading) {
         return <Background headerTitle="Messages">
@@ -82,7 +108,8 @@ export default function Messages() {
                         <ConversationPreview 
                         conversationTitle={c.name} 
                         lastMessage={c.lastMessage.length > 30 ? c.lastMessage.slice(0,30) + '...' : c.lastMessage} 
-                        status="unread"/>
+                        lastSent={c.lastSent && parseDate(new Date(c.lastSent))}
+                        status={c.isUnread ? 'unread' : 'read'}/>
                     </Link>
                 ))}
             </div>

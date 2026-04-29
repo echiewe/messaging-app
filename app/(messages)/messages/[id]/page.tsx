@@ -7,6 +7,7 @@ import Header from '../../components/Header';
 import { useRouter } from 'next/navigation';
 import Background from '../../components/Background';
 import LoadingPage from '@/app/components/Loading';
+import { markConversationRead } from './markConversationRead';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,6 +74,11 @@ export default function ConversationPage({ params }: Props) {
         isInitialLoad.current = false;
     }, [messages]);
 
+    // Mark as read
+    useEffect(() => {
+        markConversationRead(id);
+    }, [id])
+
     // Real-time subscription
     useEffect(() => {
         const channel = supabase
@@ -87,12 +93,14 @@ export default function ConversationPage({ params }: Props) {
             },
             (payload) => {
                 setMessages((prev) => [...prev, payload.new as Message])
+                markConversationRead(id);
             }
         )
         .subscribe();
 
+
         return () => {
-        supabase.removeChannel(channel)
+            supabase.removeChannel(channel)
         };
     }, [id]);
 
@@ -122,6 +130,8 @@ export default function ConversationPage({ params }: Props) {
                 setError("Error sending message. Please try again later.");
             }
         }
+
+        markConversationRead(id);
     }
 
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,6 +148,17 @@ export default function ConversationPage({ params }: Props) {
         if (fileInputRef.current) fileInputRef.current.value = '';
     }
 
+    const parseDate = (date: Date) => {
+        const now = new Date();
+        const isToday = date.toDateString() === now.toDateString();
+
+        if (isToday) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } else {
+            return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        }
+    }
+
     if (loading) {
         return <Background headerIconUrl='/icons/back.png' headerTitle={chatName} headerIconFunc={() => router.push('/messages')}>
             <LoadingPage />
@@ -145,8 +166,8 @@ export default function ConversationPage({ params }: Props) {
     }
 
     return (
-        <div className="h-screen w-screen bg-white md:bg-[#ecf0e9] flex justify-center items-center">
-            <div className='h-full w-full md:h-4/5 md:w-1/4  md:bg-white border-dark-green border-4 flex flex-col justify-end items-center'>
+        <div className="h-screen w-screen bg-off-white md:bg-light-grey-green flex justify-center items-center">
+            <div className='h-full w-full md:h-4/5 md:w-1/3 md:bg-off-white border-dark-green border-4 flex flex-col justify-end items-center'>
                 <div className="w-full flex justify-center">
                     <Header 
                     iconUrl='/icons/back.png' 
@@ -157,7 +178,7 @@ export default function ConversationPage({ params }: Props) {
                     aboutPage={() => router.push(`/messages/${id}/chat-info`)}/>
                 </div>
                 <div className="flex-1 min-h-0 w-full p-3 flex flex-col">
-                    <div className='flex flex-col flex-1 w-full overflow-auto py-2'>
+                    <div className='flex flex-col gap-1 flex-1 w-full overflow-auto py-2'>
                         {messages.map((m) => (
                             <div className={`w-full flex ${m.sender_id == user ? 'justify-end': 'justify-start'}`} key={m.id}>
                                 <div className={`flex flex-col ${m.sender_id == user ? 'items-end' : 'items-start'}`}>
@@ -165,18 +186,20 @@ export default function ConversationPage({ params }: Props) {
                                         <img
                                         src={m.content} 
                                         alt="sent image"
-                                        className={`max-w-xs m-2 rounded cursor-pointer`}
+                                        className={`max-w-3xs m-2 cursor-pointer p-3 border
+                                            ${m.sender_id == user ? 'bg-light-green border-dark-green' : 'bg-gray-200 border-gray-600'}`}
                                         onClick={() => window.open(m.content, '_blank')} // open full size on click
                                         onError={(e) => {
                                             e.currentTarget.src = '/icons/broken-image.png'
                                         }}
                                         />
                                     ) : (
-                                        <p className={`max-w-xs p-2 m-2 ${m.sender_id == user ? 'bg-light-green' : 'bg-gray-200'}`}>
+                                        <p className={`max-w-3xs text-sm p-2 mx-2 border
+                                        ${m.sender_id == user ? 'bg-light-green border-dark-green text-dark-dark-green' : 'bg-gray-200 border-gray-600'}`}>
                                             {m.content}
                                         </p>
                                     )}
-                                    <p className='text-gray-300 text-xs mx-2'>{new Date(m.created_at).toLocaleTimeString()}</p>
+                                    <p className='text-gray-300 text-xs mx-2'>{parseDate(new Date(m.created_at))}</p>
                                 </div>
                             </div>
                         ))}

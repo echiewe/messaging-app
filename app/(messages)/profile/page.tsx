@@ -23,7 +23,6 @@ export default function Profile() {
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
-    const [uploading, setUploading] = useState(false)
 
     const [isAlert, setIsAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
