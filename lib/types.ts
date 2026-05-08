@@ -4,6 +4,7 @@ export type Message = {
     created_at: string
     sender_id: string
     type: 'text' | 'image'
+    message_reactions: Reaction[]
 }
 
 export type Conversation = {
@@ -26,4 +27,10 @@ export type User = {
     username: string
     display_name: string
     avatar_url: string
+}
+
+export type Reaction = {
+  id: string
+  reaction: string
+  user_id: string
 }

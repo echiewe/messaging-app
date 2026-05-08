@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import Background from '../../components/Background';
 import LoadingPage from '@/app/components/Loading';
 import { markConversationRead } from '../../../services/markConversationRead';
+import { MessageBubble } from './components/MessageBubble';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,18 +38,29 @@ export default function ConversationPage({ params }: Props) {
         async function fetchMessages() {
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user!.id);
-
             const { data, error } = await supabase
                 .from('messages')
-                .select('*')
+                .select(`
+                    id,
+                    sender_id,
+                    content,
+                    created_at,
+                    type,
+                    message_reactions (
+                        id,
+                        reaction,
+                        user_id
+                    )
+                `)
                 .eq('conversation_id', id)
-                .order('created_at', { ascending: true });
+                .order('created_at', { ascending: true })
 
             if (data) setMessages(data);
             if (error) {
                 console.error("Error fetching conversations:", error);
                 setError("Error loading data. Please try again.");
             }
+            console.log(data)
         }
 
         async function fetchConversationInfo() {
@@ -92,7 +104,10 @@ export default function ConversationPage({ params }: Props) {
             filter: `conversation_id=eq.${id}`,
             },
             (payload) => {
-                setMessages((prev) => [...prev, payload.new as Message])
+                setMessages((prev) => [...prev, { 
+                    ...payload.new as Message, 
+                    message_reactions: [] 
+                }])
                 markConversationRead(id);
             }
         )
@@ -180,28 +195,12 @@ export default function ConversationPage({ params }: Props) {
                 <div className="flex-1 min-h-0 w-full p-3 flex flex-col">
                     <div className='flex flex-col gap-1 flex-1 w-full overflow-auto py-2'>
                         {messages.map((m) => (
-                            <div className={`w-full flex ${m.sender_id == user ? 'justify-end': 'justify-start'}`} key={m.id}>
-                                <div className={`flex flex-col ${m.sender_id == user ? 'items-end' : 'items-start'}`}>
-                                    {m.type === 'image' ? (
-                                        <img
-                                        src={m.content} 
-                                        alt="sent image"
-                                        className={`max-w-3xs m-2 cursor-pointer p-3 border
-                                            ${m.sender_id == user ? 'bg-light-green border-dark-green' : 'bg-gray-200 border-gray-600'}`}
-                                        onClick={() => window.open(m.content, '_blank')} // open full size on click
-                                        onError={(e) => {
-                                            e.currentTarget.src = '/icons/broken-image.png'
-                                        }}
-                                        />
-                                    ) : (
-                                        <p className={`max-w-3xs text-sm p-2 mx-2 border
-                                        ${m.sender_id == user ? 'bg-light-green border-dark-green text-dark-dark-green' : 'bg-gray-200 border-gray-600'}`}>
-                                            {m.content}
-                                        </p>
-                                    )}
-                                    <p className='text-gray-300 text-xs mx-2'>{parseDate(new Date(m.created_at))}</p>
-                                </div>
-                            </div>
+                            <MessageBubble 
+                                key={m.id}
+                                m={m}
+                                currentUserId={user}
+                                parseDate={parseDate}
+                            />
                         ))}
                         <div ref={bottomRef} />
                     </div>
