@@ -1,13 +1,13 @@
 'use client';
 import { use, useEffect, useState, useRef } from 'react';
 import { createClient } from "@/lib/supabase/client";
-import { uploadChatImage } from './uploadChatImage';
+import { uploadChatImage } from '../../../services/uploadChatImage';
 import { Message } from "@/lib/types";
 import Header from '../../components/Header';
 import { useRouter } from 'next/navigation';
 import Background from '../../components/Background';
 import LoadingPage from '@/app/components/Loading';
-import { markConversationRead } from './markConversationRead';
+import { markConversationRead } from '../../../services/markConversationRead';
 
 export const dynamic = 'force-dynamic';
 

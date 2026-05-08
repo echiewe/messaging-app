@@ -7,7 +7,7 @@ import Background from "../components/Background";
 import SignOutButton from "../components/SignOutButton";
 import LoadingPage from "@/app/components/Loading";
 import Alert from "@/app/components/Alert";
-import { uploadProfileImage, removeProfileImage } from "./uploadProfileImage";
+import { uploadProfileImage, removeProfileImage } from "../../services/uploadProfileImage";
 
 export const dynamic = 'force-dynamic';
 
