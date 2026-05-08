@@ -2,7 +2,7 @@
 import { use, useEffect, useState, useRef } from 'react';
 import { createClient } from "@/lib/supabase/client";
 import { uploadChatImage } from '../../../services/uploadChatImage';
-import { Message } from "@/lib/types";
+import { Message, Reaction } from "@/lib/types";
 import Header from '../../components/Header';
 import { useRouter } from 'next/navigation';
 import Background from '../../components/Background';
@@ -98,10 +98,10 @@ export default function ConversationPage({ params }: Props) {
         .on(
             'postgres_changes',
             {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages',
-            filter: `conversation_id=eq.${id}`,
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages',
+                filter: `conversation_id=eq.${id}`,
             },
             (payload) => {
                 setMessages((prev) => [...prev, { 
@@ -109,6 +109,44 @@ export default function ConversationPage({ params }: Props) {
                     message_reactions: [] 
                 }])
                 markConversationRead(id);
+            }
+        )
+        .on(
+            'postgres_changes',
+            {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'message_reactions',
+                filter: `conversation_id=eq.${id}`,
+            },
+            (payload) => {
+                const newReaction = payload.new as Reaction & { message_id: string }
+                setMessages((prev) =>
+                prev.map((m) =>
+                    m.id === newReaction.message_id
+                    ? { ...m, message_reactions: [...(m.message_reactions ?? []), newReaction] }
+                    : m
+                )
+                )
+            }
+            )
+        .on(
+            'postgres_changes',
+            {
+                event: 'DELETE',
+                schema: 'public',
+                table: 'message_reactions',
+                filter: `conversation_id=eq.${id}`, // ← server-side filter now
+            },
+            (payload) => {
+                const removed = payload.old as { id: string, message_id: string }
+                setMessages((prev) =>
+                prev.map((m) =>
+                    m.id === removed.message_id
+                    ? { ...m, message_reactions: m.message_reactions.filter((r) => r.id !== removed.id) }
+                    : m
+                )
+                )
             }
         )
         .subscribe();
@@ -198,6 +236,7 @@ export default function ConversationPage({ params }: Props) {
                             <MessageBubble 
                                 key={m.id}
                                 m={m}
+                                conversationId={id}
                                 currentUserId={user}
                                 parseDate={parseDate}
                             />

@@ -1,7 +1,7 @@
 "use server";
 import { createClient } from '@/lib/supabase/server';
 
-export async function addReaction(messageId: string, reaction: string) {
+export async function addReaction(messageId: string, conversationId: string, reaction: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: "Unauthenticated" }
@@ -22,7 +22,7 @@ export async function addReaction(messageId: string, reaction: string) {
 
     const { error } = await supabase
         .from('message_reactions')
-        .insert({ message_id: messageId, user_id: user.id, reaction })
+        .insert({ message_id: messageId, user_id: user.id, reaction, conversation_id: conversationId })
 
     if (error) return { error: error.message }
     return { success: true }

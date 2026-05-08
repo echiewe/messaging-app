@@ -7,11 +7,12 @@ import { Message } from "@/lib/types"
 
 type Props = {
     m: Message
+    conversationId: string
     currentUserId: string
     parseDate: (date: Date) => string
 }
 
-export function MessageBubble({ m, currentUserId, parseDate }: Props) {
+export function MessageBubble({ m, conversationId, currentUserId, parseDate }: Props) {
     const [showPicker, setShowPicker] = useState(false)
     const [isHovered, setIsHovered] = useState(false)
     const isMine = m.sender_id === currentUserId
@@ -24,7 +25,7 @@ export function MessageBubble({ m, currentUserId, parseDate }: Props) {
     }, {} as Record<string, { count: number, userReacted: boolean }>)
 
     async function handleReaction(emoji: string) {
-        await addReaction(m.id, emoji)
+        await addReaction(m.id, conversationId, emoji)
     }
 
     return (
