@@ -12,6 +12,8 @@ import { MessageBubble } from './components/MessageBubble';
 
 export const dynamic = 'force-dynamic';
 
+const PAGE_SIZE = 20;
+
 type Props = {
   params: Promise<{ id: string }>
 }
@@ -28,68 +30,139 @@ export default function ConversationPage({ params }: Props) {
     const bottomRef = useRef<HTMLDivElement>(null);
     const [image, setImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+    // Pagination
+    const [oldestMessageDate, setOldestMessageDate] = useState<string | null>(null);
+    const [hasMore, setHasMore] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    // TODO: pagination 
+
+    // Initial load 
+    const fetchMessages = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user!.id);
+        const { data, error } = await supabase
+            .from('messages')
+            .select(`
+                id,
+                sender_id,
+                content,
+                created_at,
+                type,
+                message_reactions (
+                    id,
+                    reaction,
+                    user_id
+                )
+            `)
+            .eq('conversation_id', id)
+            .order('created_at', { ascending: false })
+            .limit(PAGE_SIZE);
+
+        if (data) setMessages(data);
+        if (error ) {
+            console.error("Error fetching conversations:", error);
+            setError("Error loading data. Please try again.");
+        }
+        const sorted = data?.reverse();
+        if (sorted) {
+            setMessages(sorted.map(m => ({ ...m, message_reactions: m.message_reactions ?? [] })));
+            setOldestMessageDate(sorted[0]?.created_at ?? null);
+        }
+        setHasMore(data?.length === PAGE_SIZE);
+    }
+
+    const fetchConversationInfo = async () => {
+        const { data: conversation } = await supabase
+            .from('conversations')
+            .select('name')
+            .eq('id', id)
+            .single();
+        setChatName(conversation?.name);
+    }
 
     useEffect(() => {
-        async function fetchMessages() {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user!.id);
-            const { data, error } = await supabase
-                .from('messages')
-                .select(`
-                    id,
-                    sender_id,
-                    content,
-                    created_at,
-                    type,
-                    message_reactions (
-                        id,
-                        reaction,
-                        user_id
-                    )
-                `)
-                .eq('conversation_id', id)
-                .order('created_at', { ascending: true })
-
-            if (data) setMessages(data);
-            if (error) {
-                console.error("Error fetching conversations:", error);
-                setError("Error loading data. Please try again.");
-            }
-            console.log(data)
-        }
-
-        async function fetchConversationInfo() {
-            const { data: conversation } = await supabase
-                .from('conversations')
-                .select('name')
-                .eq('id', id)
-                .single();
-            setChatName(conversation?.name);
-        }
-
         fetchMessages();
         fetchConversationInfo();
         setLoading(false);
     }, [id]);
 
-    const isInitialLoad = useRef(true);
 
+    // Pagination
+    const fetchMoreMessages = async () => {
+        if (!hasMore || loadingMore || !oldestMessageDate) return
+        setLoadingMore(true);
+
+        const { data, error } = await supabase
+            .from('messages')
+            .select(`
+                id,
+                sender_id,
+                content,
+                created_at,
+                type,
+                message_reactions (
+                    id,
+                    reaction,
+                    user_id
+                )
+            `)
+            .eq('conversation_id', id)
+            .lt('created_at', oldestMessageDate) 
+            .order('created_at', { ascending: false })
+            .limit(PAGE_SIZE)
+
+        if (error || !data) {
+            setLoadingMore(false);
+            console.error("Error loading more messages:", error);
+            setError("Error loading more messages. Please try again.");
+            return;
+        }
+
+        const sorted = data.reverse();
+        setMessages((prev) => [
+            ...sorted.map(m => ({ ...m, message_reactions: m.message_reactions ?? [] })),
+            ...prev 
+        ]);
+        setOldestMessageDate(sorted[0]?.created_at ?? null);
+        setHasMore(data.length === PAGE_SIZE);
+        setLoadingMore(false);
+    }
+
+    const handleScroll = () => {
+        if (scrollRef.current?.scrollTop === 0) {
+            fetchMoreMessages();
+        }
+    }
+
+
+    // Scrolls to bottom (most recent message)
+    const isInitialLoad = useRef(true);
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({
-            behavior: isInitialLoad.current ? "instant" : "smooth"
-        });
-        isInitialLoad.current = false;
+        if (isInitialLoad.current && messages.length > 0) {
+            bottomRef.current?.scrollIntoView({
+                behavior: "instant"
+            });
+            isInitialLoad.current = false;
+        }
     }, [messages]);
+
+    const scrollToBottom = () => {
+        console.log('scroll')
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+
 
     // Mark as read
     useEffect(() => {
         markConversationRead(id);
     }, [id])
+
 
     // Real-time subscription
     useEffect(() => {
@@ -109,6 +182,7 @@ export default function ConversationPage({ params }: Props) {
                     message_reactions: [] 
                 }])
                 markConversationRead(id);
+                scrollToBottom();
             }
         )
         .on(
@@ -157,6 +231,8 @@ export default function ConversationPage({ params }: Props) {
         };
     }, [id]);
 
+
+    // Sending message
     const handleSend = () => {
         insertIntoDB();
         setMessage('');
@@ -187,6 +263,8 @@ export default function ConversationPage({ params }: Props) {
         markConversationRead(id);
     }
 
+
+    // Image selection
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -200,6 +278,7 @@ export default function ConversationPage({ params }: Props) {
         setImagePreview(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
     }
+
 
     const parseDate = (date: Date) => {
         const now = new Date();
@@ -231,7 +310,10 @@ export default function ConversationPage({ params }: Props) {
                     aboutPage={() => router.push(`/messages/${id}/chat-info`)}/>
                 </div>
                 <div className="flex-1 min-h-0 w-full p-3 flex flex-col">
-                    <div className='flex flex-col gap-1 flex-1 w-full overflow-auto py-2'>
+                    <div ref={scrollRef} onScroll={handleScroll} className='flex flex-col gap-1 flex-1 w-full overflow-auto py-2'>
+                        {loadingMore && (
+                            <p className='text-sm text-center'>Loading...</p>
+                        )}
                         {messages.map((m) => (
                             <MessageBubble 
                                 key={m.id}
@@ -248,18 +330,18 @@ export default function ConversationPage({ params }: Props) {
                     {/* image preview */}
                         {imagePreview && (
                             <div className='relative w-max h-24 m-2'>
-                            <img
-                                src={imagePreview}
-                                alt="preview"
-                                className='w-auto h-full object-cover border border-dark-green p-1'
-                            />
-                            <button
-                                onClick={handleRemoveImage}
-                                className='absolute -top-2 -right-2 bg-orange text-white w-5 h-5 flex items-center justify-center text-xs leading-none'
-                                aria-label="Remove image"
-                            >
-                                ×
-                            </button>
+                                <img
+                                    src={imagePreview}
+                                    alt="preview"
+                                    className='w-auto h-full object-cover border border-dark-green p-1'
+                                />
+                                <button
+                                    onClick={handleRemoveImage}
+                                    className='absolute -top-2 -right-2 bg-orange text-white w-5 h-5 flex items-center justify-center text-xs leading-none'
+                                    aria-label="Remove image"
+                                >
+                                    ×
+                                </button>
                             </div>
                         )}
 
